@@ -7,17 +7,17 @@
 
 ## Overview & Objective
 
-During Senior Capstone I, our team leveraged Lovable.dev and other AI-assisted tools to rapidly produce a functional prototype of the AWS CAMP Minority Business Directory. While this approach enabled fast visual and interaction-level progress, it prioritized speed over long-term maintainability.
+During Senior Capstone I, our team leveraged AI-assisted tools to rapidly produce a functional prototype of the AWS CAMP Minority Business Directory. While this approach enabled fast visual and interaction-level progress, it prioritized speed over long-term maintainability.
 
 As we transition into Senior Capstone II, our role shifts from **feature builders** to **system orchestrators**. This document represents a deliberate “project reset,” where we pause feature development to audit the structural health of our current codebase. The goal is to identify technical debt introduced during AI-assisted prototyping and assess project risks inherent in an agentic development workflow so that future development is intentional, secure, and scalable.
 
-This inventory serves as the bridge between our Lovable.dev prototype and a production-quality system.
+This inventory serves as the bridge between our initial prototype and a production-quality system.
 
 ---
 
 ## Part 1: Technical Debt Audit
 
-The following technical debt items were identified through manual inspection of the Lovable.dev–generated codebase, supported by AI-assisted code review tools. Each item represents a structural limitation that must be addressed before scaling the system.
+The following technical debt items were identified through manual inspection of the AI-generated codebase, supported by AI-assisted code review tools. Each item represents a structural limitation that must be addressed before scaling the system.
 
 ---
 
@@ -131,13 +131,13 @@ Define clear trust boundaries and require human oversight for all authentication
 ### 3. Dependency & Platform Risk
 
 **Risk:**  
-Reliance on Lovable.dev–generated structures and assumptions may limit flexibility if platform templates or APIs change.
+Reliance on external platform-generated structures and assumptions may limit flexibility if platform templates or APIs change.
 
 **Impact:**  
 Future refactors may become more expensive if the team does not assert ownership over the architecture.
 
 **Mitigation Strategy:**  
-Gradually decouple generated code from platform-specific assumptions and treat Lovable.dev output as scaffolding, not a long-term dependency.
+Gradually decouple generated code from platform-specific assumptions and treat external platform output as scaffolding, not a long-term dependency. **Note: This risk has been mitigated by removing external platform dependencies and making the project self-contained.**
 
 ---
 
