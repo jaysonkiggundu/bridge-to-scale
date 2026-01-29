@@ -1,40 +1,33 @@
+import { useState, useMemo } from "react";
 import Navigation from "@/components/Navigation";
-import { Input } from "@/components/ui/input";
+import { BusinessCard } from "@/components/BusinessCard";
+import { BusinessFilters } from "@/components/BusinessFilters";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Star, Filter } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Business, BusinessFilters as Filters } from "@/types/business";
+import { mockBusinesses } from "@/data/mockBusinesses";
+import { filterBusinesses, sortBusinesses, getUniqueCategories, getUniqueDiversityTags } from "@/lib/businessUtils";
+import { ArrowUpDown, Grid, List } from "lucide-react";
 
 const Browse = () => {
-  const businesses = [
-    {
-      name: "Tech Innovations Inc",
-      category: "Technology",
-      location: "San Francisco, CA",
-      rating: 4.8,
-      reviews: 124,
-      diversity: ["Black-owned", "Female-founded"],
-      description: "Leading cloud solutions provider specializing in AI and machine learning",
-    },
-    {
-      name: "Green Solutions Co",
-      category: "Sustainability",
-      location: "Austin, TX",
-      rating: 4.9,
-      reviews: 89,
-      diversity: ["Latino-owned"],
-      description: "Sustainable packaging and eco-friendly business solutions",
-    },
-    {
-      name: "Creative Design Studio",
-      category: "Design",
-      location: "New York, NY",
-      rating: 4.7,
-      reviews: 156,
-      diversity: ["LGBTQIA+-owned", "Female-founded"],
-      description: "Award-winning branding and digital design agency",
-    },
-  ];
+  const [filters, setFilters] = useState<Filters>({});
+  const [sortBy, setSortBy] = useState<'name' | 'rating' | 'reviews' | 'newest'>('rating');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+  // Get unique values for filter options
+  const availableCategories = useMemo(() => getUniqueCategories(mockBusinesses), []);
+  const availableDiversityTags = useMemo(() => getUniqueDiversityTags(mockBusinesses), []);
+
+  // Filter and sort businesses
+  const filteredBusinesses = useMemo(() => {
+    const filtered = filterBusinesses(mockBusinesses, filters);
+    return sortBusinesses(filtered, sortBy);
+  }, [filters, sortBy]);
+
+  const handleViewProfile = (business: Business) => {
+    // TODO: Navigate to business profile page
+    console.log('View profile for:', business.name);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -44,85 +37,94 @@ const Browse = () => {
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-4">Discover Diverse Businesses</h1>
           <p className="text-lg text-muted-foreground">
-            Find and support minority-owned businesses across all industries
+            Find and support minority-owned businesses across all industries. 
+            Showing {filteredBusinesses.length} of {mockBusinesses.length} businesses.
           </p>
         </div>
 
-        {/* Search and Filters */}
-        <div className="mb-8 space-y-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                placeholder="Search businesses..."
-                className="pl-12 h-12"
-              />
-            </div>
-            <div className="relative md:w-64">
-              <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                placeholder="Location"
-                className="pl-12 h-12"
-              />
-            </div>
-            <Button size="lg" variant="outline">
-              <Filter className="mr-2 h-5 w-5" />
-              Filters
-            </Button>
+        {/* Filters */}
+        <div className="mb-8">
+          <BusinessFilters
+            filters={filters}
+            onFiltersChange={setFilters}
+            availableCategories={availableCategories}
+            availableDiversityTags={availableDiversityTags}
+          />
+        </div>
+
+        {/* Sort and View Controls */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div className="flex items-center gap-2">
+            <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">Sort by:</span>
+            <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="rating">Highest Rated</SelectItem>
+                <SelectItem value="reviews">Most Reviews</SelectItem>
+                <SelectItem value="name">Name A-Z</SelectItem>
+                <SelectItem value="newest">Newest</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          
-          <div className="flex flex-wrap gap-2">
-            {["All", "Black-owned", "Female-founded", "Latino-owned", "LGBTQIA+-owned", "Technology", "Retail", "Services"].map((filter) => (
-              <Badge
-                key={filter}
-                variant={filter === "All" ? "default" : "outline"}
-                className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-              >
-                {filter}
-              </Badge>
-            ))}
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('grid')}
+            >
+              <Grid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('list')}
+            >
+              <List className="h-4 w-4" />
+            </Button>
           </div>
         </div>
 
         {/* Results */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {businesses.map((business, index) => (
-            <Card key={index} className="hover:shadow-lg transition-all cursor-pointer">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="h-16 w-16 rounded-lg bg-gradient-to-br from-primary/20 to-primary-glow/20" />
-                  <div className="flex items-center gap-1 text-sm">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-semibold">{business.rating}</span>
-                    <span className="text-muted-foreground">({business.reviews})</span>
-                  </div>
-                </div>
-                
-                <h3 className="text-xl font-semibold mb-2">{business.name}</h3>
-                <div className="flex items-center text-sm text-muted-foreground mb-3">
-                  <MapPin className="h-4 w-4 mr-1" />
-                  {business.location}
-                </div>
-                
-                <p className="text-sm text-muted-foreground mb-4">
-                  {business.description}
-                </p>
-                
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary">{business.category}</Badge>
-                  {business.diversity.map((tag, i) => (
-                    <Badge key={i} className="bg-primary/10 text-primary hover:bg-primary/20">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-              <CardFooter className="p-6 pt-0">
-                <Button className="w-full">View Profile</Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+        {filteredBusinesses.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4">🔍</div>
+            <h3 className="text-xl font-semibold mb-2">No businesses found</h3>
+            <p className="text-muted-foreground mb-4">
+              Try adjusting your filters or search terms to find more businesses.
+            </p>
+            <Button onClick={() => setFilters({})}>
+              Clear All Filters
+            </Button>
+          </div>
+        ) : (
+          <div className={
+            viewMode === 'grid' 
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              : "space-y-4"
+          }>
+            {filteredBusinesses.map((business) => (
+              <BusinessCard
+                key={business.id}
+                business={business}
+                onViewProfile={handleViewProfile}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Load More (for future pagination) */}
+        {filteredBusinesses.length > 0 && (
+          <div className="text-center mt-12">
+            <p className="text-sm text-muted-foreground mb-4">
+              Showing {filteredBusinesses.length} businesses
+            </p>
+            {/* Future: Add pagination or load more functionality */}
+          </div>
+        )}
       </div>
     </div>
   );
